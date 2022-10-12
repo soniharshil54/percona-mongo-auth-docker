@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  mongonex-auth:
+    build:
+      context: mongo/
+    image: nexus-mongo-auth-core
+    restart: on-failure
+    ports:
+      - 30007:27017
+    networks:
+      - percona-network
+    volumes:
+      - "./mongodata:/data/db"
+    command: bash -c "mongod --auth --bind_ip_all && touch /testfile.txt && sh /init-scripts/custom-user-v2.sh;"
+  
+  # mongo-express-auth:
+  #   image: mongo-express
+  #   restart: on-failure
+  #   ports:
+  #     - 8087:8081
+  #   depends_on:
+  #     - mongonex-auth  
+  #   networks:
+  #     - percona-network
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #     ME_CONFIG_MONGODB_SERVER: mongonex-auth
+    # command:  bash -c "sleep 10; rabbitmq-server;"
+
+networks:
+  percona-network:
+    name: percona-network
+    driver: bridge
